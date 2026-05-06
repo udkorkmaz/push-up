@@ -1,614 +1,405 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" data-theme="dark">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="default" />
-<meta name="apple-mobile-web-app-title" content="Push-up Takip" />
-<title>Push-up Takip</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  :root {
-    --bg: #0f0f0f;
-    --surface: #1a1a1a;
-    --surface2: #222222;
-    --border: #2e2e2e;
-    --text: #f0ede8;
-    --muted: #6b6b6b;
-    --accent: #d4ff4e;
-    --accent-dim: #a8cc3e;
-    --accent-dark: #1e2a06;
-    --warn: #ff8c42;
-    --warn-dark: #2a1800;
-    --danger: #ff4e4e;
-    --danger-dark: #2a0606;
-    --radius: 16px;
-    --radius-sm: 10px;
-    --mono: 'DM Mono', monospace;
-    --display: 'Bebas Neue', sans-serif;
-    --body: 'DM Sans', sans-serif;
-  }
+:root {
+  --bg:#0f0f0f; --surface:#1a1a1a; --surface2:#222;
+  --border:#2e2e2e; --border2:rgba(255,255,255,0.13);
+  --text:#f0ede8; --text2:#8C8880; --text3:#575450;
+  --accent:#d4ff4e; --accent-dim:#a8cc3e; --accent-dark:#1e2a06;
+  --green:#4ADE80; --green-bg:rgba(74,222,128,0.12);
+  --red:#F87171; --red-bg:rgba(248,113,113,0.12);
+  --blue:#60A5FA;
+  --radius:14px; --radius-sm:10px;
+  --mono:'DM Mono',monospace; --display:'Bebas Neue',sans-serif; --body:'DM Sans',sans-serif;
+}
+[data-theme="light"] {
+  --bg:#F5F4F0; --surface:#fff; --surface2:#EEECEA;
+  --border:rgba(0,0,0,0.08); --border2:rgba(0,0,0,0.14);
+  --text:#1A1917; --text2:#6B6860; --text3:#A8A49E;
+  --accent:#5a8a00; --accent-dim:#3d6000; --accent-dark:#e8f5c8;
+  --green:#16A34A; --green-bg:#DCFCE7;
+}
 
-  body {
-    font-family: var(--body);
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-  }
-  .container { max-width: 430px; margin: 0 auto; padding: 24px 16px 60px; }
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{height:100%;background:var(--bg);font-family:var(--body);color:var(--text);overflow-x:hidden}
+.app{max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;padding-bottom:40px}
 
-  .header { margin-bottom: 24px; }
-  .header h1 { font-family: var(--display); font-size: 52px; letter-spacing: 1px; line-height: 1; color: var(--text); }
-  .header h1 span { color: var(--accent); }
-  .header .sub { font-size: 13px; color: var(--muted); margin-top: 6px; font-family: var(--mono); }
+.header{padding:20px 20px 0;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.header-left{flex:1}
+.header-left h1{font-family:var(--display);font-size:48px;letter-spacing:1px;line-height:1}
+.header-left h1 span{color:var(--accent)}
+.header-sub{font-size:12px;color:var(--text3);margin-top:4px;font-family:var(--mono)}
+.header-right{display:flex;gap:8px;align-items:center;padding-top:4px}
+.icon-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border2);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.icon-btn:active{transform:scale(0.9)}
 
-  .clockbar {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 12px 16px; background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius-sm); margin-bottom: 14px;
-  }
-  .clockbar .cb-date { font-size: 13px; color: var(--muted); font-family: var(--mono); }
-  .clockbar .cb-time { font-size: 15px; font-weight: 600; font-family: var(--mono); color: var(--text); }
+.clockbar{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm)}
+.cb-date{font-size:12px;color:var(--text3);font-family:var(--mono)}
+.cb-time{font-size:14px;font-weight:600;font-family:var(--mono)}
 
-  .period-pill {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 5px 12px; border-radius: 99px; font-size: 12px; font-weight: 600;
-    font-family: var(--mono); margin-bottom: 14px; border: 1px solid;
-  }
-  .period-pill.morning   { background: #1a1500; border-color: #4a3c00; color: #d4a017; }
-  .period-pill.afternoon { background: #0d1a2e; border-color: #1a3a5c; color: #5c9ee6; }
-  .period-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; animation: blink 1.5s ease-in-out infinite; }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.period-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:99px;font-size:12px;font-weight:600;font-family:var(--mono);border:1px solid}
+.period-pill.morning{background:#1a1500;border-color:#4a3c00;color:#d4a017}
+.period-pill.afternoon{background:#0d1a2e;border-color:#1a3a5c;color:#5c9ee6}
+.pill-dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:blink 1.5s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
 
-  /* ARC */
-  .arc-wrapper {
-    display: flex; flex-direction: column; align-items: center;
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 28px 20px 20px; margin-bottom: 14px;
-    position: relative; overflow: hidden;
-  }
-  .arc-wrapper::before {
-    content:''; position:absolute; top:0; left:0; right:0; height:2px;
-    background: linear-gradient(90deg, var(--accent), transparent);
-  }
-  .arc-svg { width: 220px; height: 220px; overflow: visible; position: relative; }
-  .arc-track { fill:none; stroke:var(--border); stroke-width:14; stroke-linecap:round; }
-  .arc-fill  {
-    fill:none; stroke:var(--accent); stroke-width:14; stroke-linecap:round;
-    transition: stroke-dashoffset 0.9s cubic-bezier(0.34,1.2,0.64,1), stroke 0.4s;
-  }
-  .arc-fill.complete { filter: drop-shadow(0 0 10px #d4ff4e99); }
+.arc-wrapper{display:flex;flex-direction:column;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px 20px 18px;position:relative;overflow:hidden}
+.arc-wrapper::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),transparent)}
+.arc-svg{width:180px;height:180px;overflow:visible}
+.arc-track{fill:none;stroke:var(--border);stroke-width:12;stroke-linecap:round}
+.arc-fill{fill:none;stroke:var(--accent);stroke-width:12;stroke-linecap:round;transition:stroke-dashoffset 0.8s cubic-bezier(0.34,1.2,0.64,1)}
+.arc-fill.complete{filter:drop-shadow(0 0 8px #d4ff4e99)}
+.arc-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-62%);text-align:center;pointer-events:none}
+.arc-pct{font-family:var(--display);font-size:58px;line-height:1;color:var(--text);transition:color 0.3s}
+.arc-pct.complete{color:var(--accent)}
+.arc-lbl-bot{font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:4px}
+.arc-bottom{display:flex;justify-content:space-between;width:100%;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
+.arc-stat{text-align:center;flex:1}
+.as-val{font-family:var(--display);font-size:24px;color:var(--text);line-height:1}
+.as-val.accent{color:var(--accent)}
+.as-lbl{font-size:10px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px}
+.arc-div{width:1px;background:var(--border)}
 
-  .arc-center {
-    position:absolute; top:50%; left:50%; transform:translate(-50%,-58%);
-    text-align:center; pointer-events:none;
-  }
-  .arc-label-top { font-size:11px; color:var(--muted); font-family:var(--mono); text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; }
-  .arc-num { font-family:var(--display); font-size:58px; line-height:1; color:var(--text); letter-spacing:1px; transition:color 0.3s; }
-  .arc-num.complete { color:var(--accent); }
-  .arc-pct { font-family:var(--display); font-size:20px; color:var(--accent-dim); margin-top:1px; }
-  .arc-label-bot { font-size:12px; color:var(--muted); font-family:var(--mono); margin-top:3px; }
-  .arc-label-bot span { color:var(--text); }
+.goal-row{display:flex;align-items:center;justify-content:space-between;padding:14px 20px 0}
+.goal-label{font-size:12px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.5px}
+.goal-controls{display:flex;align-items:center}
+.goal-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;font-size:18px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.goal-btn:hover{border-color:var(--accent)}
+.goal-num{font-family:var(--display);font-size:28px;color:var(--accent);width:52px;text-align:center}
 
-  .arc-bottom {
-    display:flex; justify-content:space-between; width:100%;
-    margin-top:16px; padding-top:14px; border-top:1px solid var(--border);
-  }
-  .arc-stat { text-align:center; flex:1; }
-  .arc-stat .as-val { font-family:var(--display); font-size:26px; color:var(--text); line-height:1; }
-  .arc-stat .as-val.accent { color:var(--accent); }
-  .arc-stat .as-lbl { font-size:10px; color:var(--muted); font-family:var(--mono); text-transform:uppercase; letter-spacing:0.5px; margin-top:3px; }
-  .arc-div { width:1px; background:var(--border); }
+.list-section{padding:12px 20px 0;flex:1}
+.section-title{font-size:11px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px}
+.item-wrap{margin-bottom:8px;position:relative;overflow:hidden;border-radius:var(--radius)}
+.hint-bg{position:absolute;inset:0;border-radius:var(--radius);display:flex;align-items:center;padding:0 20px;pointer-events:none;opacity:0}
+.hint-done{background:var(--green);justify-content:flex-start}
+.hint-icon{font-size:20px;color:#fff;font-weight:700}
+.item{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:12px}
+.push-num{font-family:var(--display);font-size:32px;color:var(--text3);line-height:1;width:36px;text-align:center;flex-shrink:0}
+.push-body{flex:1;min-width:0}
+.push-label{font-size:13px;color:var(--text2);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.5px}
+.swipe-arrow{font-size:20px;color:var(--text3)}
 
-  .goal-edit-btn {
-    background:none; border:1px solid var(--border); color:var(--muted);
-    border-radius:var(--radius-sm); font-size:12px; font-family:var(--mono);
-    cursor:pointer; padding:6px 14px; width:auto; margin-top:14px;
-    transition: border-color 0.15s, color 0.15s;
-  }
-  .goal-edit-btn:hover { border-color:var(--accent-dim); color:var(--accent); }
 
-  /* Period counter card */
-  .counter-card {
-    background:var(--surface); border:1px solid var(--border);
-    border-radius:var(--radius); padding:18px 20px; margin-bottom:14px;
-    position:relative; overflow:hidden;
-  }
-  .counter-card::before {
-    content:''; position:absolute; top:0; left:0; right:0; height:2px;
-    background: linear-gradient(90deg, #5c9ee688, transparent);
-  }
-  .counter-label { font-size:11px; color:var(--muted); font-family:var(--mono); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
-  .counter-big { font-family:var(--display); font-size:72px; line-height:1; color:var(--text); letter-spacing:2px; }
-  .counter-big.hit { color:var(--accent); }
-  .counter-of { font-size:13px; color:var(--muted); font-family:var(--mono); margin-top:2px; }
 
-  .prog-wrap { margin-top:12px; }
-  .prog-bg { background:var(--border); border-radius:99px; height:5px; overflow:hidden; }
-  .prog-fill { height:100%; border-radius:99px; background:linear-gradient(90deg,var(--accent-dim),var(--accent)); transition:width 0.6s cubic-bezier(0.34,1.56,0.64,1); }
-  .prog-row { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); font-family:var(--mono); margin-top:4px; }
+.celebration{margin:14px 20px 0;background:var(--accent-dark);border:1px solid var(--accent-dim);border-radius:var(--radius);padding:18px;text-align:center;display:none;animation:slideIn 0.4s cubic-bezier(0.34,1.56,0.64,1)}
+@keyframes slideIn{from{opacity:0;transform:translateY(-8px) scale(0.97)}to{opacity:1;transform:none}}
+.cel-icon{font-size:32px;margin-bottom:6px}
+.cel-msg{font-size:20px;font-weight:700;color:var(--accent);font-family:var(--display);letter-spacing:0.5px}
+.cel-sub{font-size:12px;color:var(--accent-dim);margin-top:3px;font-family:var(--mono)}
 
-  .metrics { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:14px; }
-  .metric { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px 10px; text-align:center; }
-  .metric .val { font-family:var(--display); font-size:28px; color:var(--text); line-height:1; }
-  .metric .val.accent { color:var(--accent); }
-  .metric .lbl { font-size:10px; color:var(--muted); font-family:var(--mono); margin-top:3px; text-transform:uppercase; letter-spacing:0.5px; }
+.history-section{padding:14px 20px 0}
+.history-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+.history-card h3{font-size:12px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:12px}
+.history-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.history-input{border:1px solid var(--border2);border-radius:var(--radius-sm);padding:9px 12px;font-size:14px;font-family:var(--mono);background:var(--surface2);color:var(--text);outline:none;min-width:0}
+.history-input:focus{border-color:var(--accent)}
+.history-input.date-inp{flex:1}
+.history-input.num-inp{width:72px;flex-shrink:0}
+.btn-save{padding:9px 14px;border-radius:var(--radius-sm);border:none;background:var(--accent);color:#0f0f0f;font-size:13px;font-weight:700;font-family:var(--mono);cursor:pointer;flex-shrink:0}
+.btn-save:active{opacity:0.8}
+.history-log{margin-top:10px;max-height:180px;overflow-y:auto}
+.hlog-entry{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;gap:8px}
+.hlog-entry:last-child{border-bottom:none}
+.hlog-date{color:var(--text3);font-family:var(--mono);font-size:12px;flex:1}
+.hlog-count{font-family:var(--display);font-size:20px;color:var(--accent);flex-shrink:0}
+.hlog-goal{font-size:11px;color:var(--text3);font-family:var(--mono);flex-shrink:0}
+.hlog-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:2px 4px;opacity:0.5;flex-shrink:0}
+.hlog-del:hover{opacity:1;color:var(--red)}
 
-  .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:14px; }
-  .card h2 { font-size:14px; font-weight:600; margin-bottom:14px; color:var(--text); }
-  .field { margin-bottom:12px; }
-  .field-label { font-size:11px; color:var(--muted); font-family:var(--mono); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; }
+.actions-row{padding:14px 20px 0;display:flex;gap:8px}
+.btn-action{flex:1;padding:11px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface);color:var(--text2);font-size:12px;font-family:var(--mono);cursor:pointer;text-align:center}
+.btn-action:hover{border-color:var(--accent-dim);color:var(--accent)}
 
-  input[type=number] {
-    width:100%; padding:13px 14px; border:1px solid var(--border); border-radius:var(--radius-sm);
-    font-size:18px; background:var(--surface2); color:var(--text);
-    outline:none; font-family:var(--mono); -webkit-appearance:none; transition:border-color 0.15s;
-  }
-  input[type=number]:focus { border-color:var(--accent); }
-
-  button.btn-primary {
-    display:block; width:100%; padding:15px;
-    background:var(--accent); color:#0f0f0f; border:none;
-    border-radius:var(--radius-sm); font-size:16px; font-weight:700;
-    font-family:var(--body); cursor:pointer; transition:transform 0.1s, opacity 0.15s;
-  }
-  button.btn-primary:active { transform:scale(0.98); opacity:0.9; }
-
-  .celebration {
-    background:var(--accent-dark); border:1px solid var(--accent-dim);
-    border-radius:var(--radius); padding:20px; text-align:center; margin-bottom:14px; display:none;
-    animation:slideIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
-  }
-  @keyframes slideIn { from{opacity:0;transform:translateY(-10px) scale(0.97)} to{opacity:1;transform:none} }
-  .cel-icon { font-size:36px; margin-bottom:8px; }
-  .cel-msg { font-size:18px; font-weight:700; color:var(--accent); font-family:var(--display); letter-spacing:0.5px; }
-  .cel-sub { font-size:12px; color:var(--accent-dim); margin-top:4px; font-family:var(--mono); }
-
-  .warn-msg { font-size:13px; color:var(--warn); margin-top:8px; display:none; font-family:var(--mono); }
-
-  .log-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
-  button.reset-link { background:none; border:none; color:var(--muted); font-size:12px; text-decoration:underline; cursor:pointer; width:auto; padding:0; font-family:var(--mono); }
-  .log-entry { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); font-size:13px; gap:8px; }
-  .log-entry:last-child { border-bottom:none; }
-  .log-period { color:var(--muted); font-size:12px; font-family:var(--mono); white-space:nowrap; }
-  .log-reps { font-weight:600; font-family:var(--mono); }
-  .badge { font-size:11px; font-weight:600; padding:3px 9px; border-radius:99px; white-space:nowrap; font-family:var(--mono); }
-  .badge-ok      { background:var(--accent-dark); color:var(--accent);  border:1px solid var(--accent-dim); }
-  .badge-miss    { background:var(--danger-dark); color:var(--danger);  border:1px solid #5a1010; }
-  .badge-partial { background:var(--warn-dark);   color:var(--warn);    border:1px solid #5a2800; }
-  .empty-log { font-size:13px; color:var(--muted); font-family:var(--mono); }
-
-  #tracker-section { display:none; }
-  .setup-sub { font-size:13px; color:var(--muted); font-family:var(--mono); margin-bottom:24px; }
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);color:var(--bg);font-size:13px;font-weight:500;padding:8px 18px;border-radius:20px;opacity:0;transition:all 0.3s;pointer-events:none;white-space:nowrap;z-index:9999}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
-<div class="container">
+<div class="app">
 
-  <!-- SETUP -->
-  <div id="setup-section">
-    <div class="header">
+  <div class="header">
+    <div class="header-left">
       <h1>PUSH<span>UP</span></h1>
-      <p class="setup-sub">// Günde 2 periyot. Sabah + öğleden sonra.</p>
+      <div class="header-sub" id="header-sub">yükleniyor...</div>
     </div>
-    <div class="card">
-      <h2>Hedeflerini belirle</h2>
-      <div class="field">
-        <div class="field-label">Her periyotta hedef (tekrar)</div>
-        <input type="number" id="setup-goal" placeholder="5" min="1" inputmode="numeric" />
-      </div>
-      <div class="field">
-        <div class="field-label">Toplam hedef (tüm zamanlık)</div>
-        <input type="number" id="setup-total" placeholder="1000" min="1" inputmode="numeric" />
-      </div>
-      <button class="btn-primary" onclick="setupTracker()">Başla</button>
+    <div class="header-right">
+      <button class="icon-btn" id="theme-btn">🌙</button>
     </div>
   </div>
 
-  <!-- TRACKER -->
-  <div id="tracker-section">
-
-    <div class="header">
-      <h1>PUSH<span>UP</span></h1>
-      <p class="sub">// periyot hedefi: <span id="hdr-goal">—</span> tekrar</p>
-    </div>
-
+  <div style="padding:12px 20px 0">
     <div class="clockbar">
       <span class="cb-date" id="clock-date"></span>
       <span class="cb-time" id="clock-time"></span>
     </div>
+  </div>
 
+  <div style="padding:10px 20px 0">
     <div class="period-pill" id="period-pill">
-      <span class="dot"></span>
-      <span id="period-name">Sabah periyodu</span>
+      <span class="pill-dot"></span>
+      <span id="period-name">—</span>
     </div>
+  </div>
 
-    <!-- ARC RING -->
+  <div style="padding:14px 20px 0">
     <div class="arc-wrapper">
-      <svg class="arc-svg" viewBox="0 0 220 220" id="arc-svg">
+      <svg class="arc-svg" viewBox="0 0 180 180">
         <defs>
-          <filter id="glow-filter">
+          <filter id="glow-f">
             <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
             <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
           </filter>
         </defs>
-        <path id="arc-track" class="arc-track" />
-        <path id="arc-glow"  class="arc-fill" style="stroke:var(--accent);stroke-width:22;opacity:0.12;transition:stroke-dashoffset 0.9s cubic-bezier(0.34,1.2,0.64,1)" />
-        <path id="arc-fill"  class="arc-fill" />
-        <circle id="arc-tip" r="7" fill="var(--accent)" opacity="0" style="filter:url(#glow-filter);transition:opacity 0.4s" />
+        <path id="arc-track" class="arc-track"/>
+        <path id="arc-glow" class="arc-fill" style="stroke:var(--accent);stroke-width:20;opacity:0.1;transition:stroke-dashoffset 0.8s cubic-bezier(0.34,1.2,0.64,1)"/>
+        <path id="arc-fill" class="arc-fill"/>
+        <circle id="arc-tip" r="6" fill="var(--accent)" opacity="0" style="filter:url(#glow-f);transition:opacity 0.4s"/>
       </svg>
       <div class="arc-center">
-        <div class="arc-label-top">Genel toplam</div>
-        <div class="arc-num" id="arc-num">0</div>
         <div class="arc-pct" id="arc-pct">0%</div>
-        <div class="arc-label-bot">/ <span id="arc-total-disp">—</span></div>
+        <div class="arc-lbl-bot" id="arc-lbl-bot">0 / 0</div>
       </div>
       <div class="arc-bottom">
         <div class="arc-stat">
-          <div class="as-val" id="ab-today">0</div>
-          <div class="as-lbl">bugün</div>
+          <div class="as-val accent" id="ab-done">0</div>
+          <div class="as-lbl">tamamlanan</div>
+        </div>
+        <div class="arc-div"></div>
+        <div class="arc-stat">
+          <div class="as-val" id="ab-remaining">—</div>
+          <div class="as-lbl">kalan</div>
         </div>
         <div class="arc-div"></div>
         <div class="arc-stat">
           <div class="as-val accent" id="ab-streak">0</div>
-          <div class="as-lbl">periyot seri</div>
-        </div>
-        <div class="arc-div"></div>
-        <div class="arc-stat">
-          <div class="as-val" id="ab-kalan">—</div>
-          <div class="as-lbl">hedefe kalan</div>
+          <div class="as-lbl">gün serisi</div>
         </div>
       </div>
-      <button class="goal-edit-btn" onclick="editGoals()">⚙ Hedefleri düzenle</button>
     </div>
-
-    <!-- Period counter -->
-    <div class="counter-card">
-      <div class="counter-label">Bu periyotta yapılan</div>
-      <div class="counter-big" id="period-count">0</div>
-      <div class="counter-of">hedef: <span id="period-goal-disp">—</span> tekrar</div>
-      <div class="prog-wrap">
-        <div class="prog-bg"><div class="prog-fill" id="period-bar" style="width:0%"></div></div>
-        <div class="prog-row"><span id="prog-label">0 / 0</span><span id="prog-pct">0%</span></div>
-      </div>
-    </div>
-
-    <!-- Metrics -->
-    <div class="metrics">
-      <div class="metric">
-        <div class="val" id="m-today">0</div>
-        <div class="lbl">bugün toplam</div>
-      </div>
-      <div class="metric">
-        <div class="val accent" id="m-periods-hit">0/0</div>
-        <div class="lbl">periyot hedef</div>
-      </div>
-      <div class="metric">
-        <div class="val" id="m-streak">0</div>
-        <div class="lbl">periyot seri</div>
-      </div>
-    </div>
-
-    <!-- Celebration -->
-    <div class="celebration" id="celebration">
-      <div class="cel-icon">💪</div>
-      <div class="cel-msg" id="cel-msg">HEDEFE ULAŞTIN</div>
-      <div class="cel-sub" id="cel-sub"></div>
-    </div>
-
-    <!-- Input -->
-    <div class="card">
-      <h2>Push-up ekle</h2>
-      <div class="field">
-        <div class="field-label">Yaptığın tekrar sayısı</div>
-        <input type="number" id="rep-input" placeholder="5" min="1" inputmode="numeric" />
-      </div>
-      <button class="btn-primary" onclick="logReps()">Kaydet</button>
-      <div class="warn-msg" id="warn-msg"></div>
-    </div>
-
-    <!-- Log -->
-    <div class="card">
-      <div class="log-header">
-        <h2 style="margin:0;font-size:14px;">Geçmiş</h2>
-        <button class="reset-link" onclick="resetAll()">Sıfırla</button>
-      </div>
-      <div id="day-log"><div class="empty-log">Henüz kayıt yok.</div></div>
-    </div>
-
   </div>
+
+  <div class="goal-row">
+    <div class="goal-label">Günlük hedef</div>
+    <div class="goal-controls">
+      <button class="goal-btn" id="goal-minus">−</button>
+      <div class="goal-num" id="goal-disp">10</div>
+      <button class="goal-btn" id="goal-plus">+</button>
+    </div>
+  </div>
+
+  <div class="celebration" id="celebration">
+    <div class="cel-icon">💪</div>
+    <div class="cel-msg" id="cel-msg">HEDEFE ULAŞTIN!</div>
+    <div class="cel-sub" id="cel-sub"></div>
+  </div>
+
+  <div class="list-section">
+    <div class="section-title" id="active-title">Bekleyen push-uplar</div>
+    <div id="card-list"></div>
+  </div>
+
+  <div class="history-section">
+    <div class="history-card">
+      <h3>📅 Geçmiş Tarih Girişi</h3>
+      <div class="history-row">
+        <input type="date" class="history-input date-inp" id="hist-date"/>
+        <input type="number" class="history-input num-inp" id="hist-count" placeholder="adet" min="1" max="999" inputmode="numeric"/>
+        <button class="btn-save" id="hist-save">Kaydet</button>
+      </div>
+      <div class="history-log" id="history-log"></div>
+    </div>
+  </div>
+
+  <div class="actions-row">
+    <button class="btn-action" id="reset-btn">🔄 Tur Ekle</button>
+  </div>
+
 </div>
+<div class="toast" id="toast"></div>
 
 <script>
-let state = { goal:0, totalGoal:0, log:[] };
-const KEY = 'pushup_takip_v2';
-function save() { localStorage.setItem(KEY, JSON.stringify(state)); }
-function load() { try { const s = localStorage.getItem(KEY); if(s) state = JSON.parse(s); } catch(e){} }
+const KEY = 'pushup_swipe_v2';
+let state = { goal: 10, days: {} };
 
-function getNow()        { return new Date(); }
-function getDateStr(d)   { return d.toISOString().split('T')[0]; }
-function getPeriod(d)    { return d.getHours() < 12 ? 'morning' : 'afternoon'; }
-function getPeriodKey(d) { return getDateStr(d) + '_' + getPeriod(d); }
-function periodShort(p)  { return p === 'morning' ? '🌅 Sabah' : '🌆 Öğlen sonrası'; }
-function entryFor(key)   { return state.log.find(e => e.key === key) || null; }
-function periodReps(key) { const e = entryFor(key); return e ? e.reps : 0; }
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+function dayData(k) { if (!state.days[k]) state.days[k] = { done:0, rounds:1 }; return state.days[k]; }
+function todayData() { return dayData(todayStr()); }
+function saveState() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} }
+function loadState() { try { const s=localStorage.getItem(KEY); if(s) state=Object.assign({goal:10,days:{}},JSON.parse(s)); } catch(e){} }
 
-// ── ARC ──────────────────────────────────────────────────────────────────────
-const ARC = { cx:110, cy:110, r:88, start:135, end:405 }; // 270° sweep
+/* Audio */
+let audioCtx=null;
+function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();return audioCtx;}
+document.addEventListener('touchstart',()=>{try{const c=getCtx(),b=c.createBuffer(1,1,22050),s=c.createBufferSource();s.buffer=b;s.connect(c.destination);s.start(0);c.resume();}catch(e){}},{once:true});
+function playDone(){try{const c=getCtx(),t=c.currentTime,o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sine';o.frequency.setValueAtTime(523,t);o.frequency.setValueAtTime(659,t+0.1);o.frequency.setValueAtTime(784,t+0.2);g.gain.setValueAtTime(0.18,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.5);o.start(t);o.stop(t+0.5);}catch(e){}}
+function playGoal(){try{const c=getCtx(),t=c.currentTime;[523,659,784,1047].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0.15,t+i*0.1);g.gain.exponentialRampToValueAtTime(0.001,t+i*0.1+0.4);o.start(t+i*0.1);o.stop(t+i*0.1+0.4);});}catch(e){}}
 
-function polarXY(deg, r) {
-  const rad = (deg - 90) * Math.PI / 180;
-  return { x: ARC.cx + r * Math.cos(rad), y: ARC.cy + r * Math.sin(rad) };
+/* Toast */
+let toastTimer=null;
+function showToast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2200);}
+
+/* Fireworks */
+function launchFireworks(el){const r=el.getBoundingClientRect();const cx=r.left+r.width/2,cy=r.top+r.height/2;const colors=['#d4ff4e','#FF6B6B','#4ADE80','#60A5FA','#F472B6','#FB923C'];for(let i=0;i<24;i++){const p=document.createElement('div');const color=colors[i%colors.length];const angle=(i/24)*Math.PI*2;const speed=70+Math.random()*80;const size=Math.random()<0.5?6:4;p.style.cssText=`position:fixed;z-index:9998;pointer-events:none;left:${cx}px;top:${cy}px;width:${size*1.4}px;height:${size}px;border-radius:2px;background:${color};transform:translate(-50%,-50%) rotate(${Math.random()*360}deg);`;document.body.appendChild(p);const tx=Math.cos(angle)*speed*(0.7+Math.random()*0.6);const ty=Math.sin(angle)*speed*(0.7+Math.random()*0.6)-50;requestAnimationFrame(()=>{p.style.transition='transform 0.7s cubic-bezier(0.2,0.8,0.4,1),opacity 0.7s ease-in';p.style.transform=`translate(calc(-50% + ${tx}px),calc(-50% + ${ty}px)) rotate(${Math.random()*720-360}deg)`;p.style.opacity='0';});setTimeout(()=>p.remove(),750);}}
+
+/* Theme */
+let dark=true;
+try{const s=localStorage.getItem('pu_theme');if(s)dark=s==='dark';}catch(e){}
+function applyTheme(){document.documentElement.setAttribute('data-theme',dark?'dark':'light');document.getElementById('theme-btn').textContent=dark?'🌙':'☀️';try{localStorage.setItem('pu_theme',dark?'dark':'light');}catch(e){}}
+applyTheme();
+document.getElementById('theme-btn').addEventListener('click',()=>{dark=!dark;applyTheme();});
+
+/* Arc */
+const ARC={cx:90,cy:90,r:72,start:135,end:405};let arcLen=null;
+function polarXY(deg,r){const rad=(deg-90)*Math.PI/180;return{x:ARC.cx+r*Math.cos(rad),y:ARC.cy+r*Math.sin(rad)};}
+function arcPathD(s,e,r){const sp=polarXY(s,r),ep=polarXY(e,r);return`M ${sp.x} ${sp.y} A ${r} ${r} 0 ${(e-s)>180?1:0} 1 ${ep.x} ${ep.y}`;}
+function initArc(){const path=arcPathD(ARC.start,ARC.end,ARC.r);['arc-track','arc-fill','arc-glow'].forEach(id=>document.getElementById(id).setAttribute('d',path));const fill=document.getElementById('arc-fill');arcLen=fill.getTotalLength();[fill,document.getElementById('arc-glow')].forEach(el=>{el.style.strokeDasharray=arcLen;el.style.strokeDashoffset=arcLen;});}
+function updateArc(fraction){if(!arcLen)initArc();const c=Math.min(1,Math.max(0,fraction));const offset=arcLen*(1-c);const fill=document.getElementById('arc-fill');const glow=document.getElementById('arc-glow');const tip=document.getElementById('arc-tip');const pctEl=document.getElementById('arc-pct');fill.style.strokeDashoffset=offset;glow.style.strokeDashoffset=offset;if(c>0.005){const deg=ARC.start+(ARC.end-ARC.start)*c;const pos=polarXY(deg,ARC.r);tip.setAttribute('cx',pos.x);tip.setAttribute('cy',pos.y);tip.setAttribute('opacity','1');}else{tip.setAttribute('opacity','0');}if(c>=1){fill.classList.add('complete');pctEl.classList.add('complete');}else{fill.classList.remove('complete');pctEl.classList.remove('complete');}}
+
+function calcStreak(){let streak=0;const d=new Date();d.setDate(d.getDate()-1);for(let i=0;i<90;i++){const k=d.toISOString().split('T')[0];const day=state.days[k];if(day&&day.done>=state.goal)streak++;else break;d.setDate(d.getDate()-1);}return streak;}
+function getPeriod(){return new Date().getHours()<12?'morning':'afternoon';}
+function todayTarget(){const td=todayData();return state.goal*(td.rounds||1);}
+
+/* Render */
+function render(){
+  const td=todayData();const done=td.done;const target=todayTarget();
+  const remaining=Math.max(0,target-done);const fraction=target>0?done/target:0;
+  const pct=Math.round(fraction*100);
+
+  document.getElementById('header-sub').textContent=done>=target?'// hedef tamamlandı 🎉':`// ${remaining} push-up kaldı`;
+  document.getElementById('goal-disp').textContent=state.goal;
+  document.getElementById('arc-pct').textContent=pct+'%';
+  document.getElementById('arc-lbl-bot').textContent=done+' / '+target;
+  updateArc(fraction);
+  document.getElementById('ab-done').textContent=done;
+  document.getElementById('ab-remaining').textContent=remaining>0?remaining:'✓';
+  document.getElementById('ab-streak').textContent=calcStreak();
+
+  const period=getPeriod();const pill=document.getElementById('period-pill');
+  pill.className='period-pill '+(period==='morning'?'morning':'afternoon');
+  document.getElementById('period-name').textContent=period==='morning'?'🌅 Sabah (00:00–11:59)':'🌆 Öğleden sonra (12:00–23:59)';
+
+  const cardList=document.getElementById('card-list');const activeCount=remaining;
+  document.getElementById('active-title').textContent=activeCount>0?`Bekleyen push-uplar (${activeCount})`:'Tüm push-uplar tamamlandı 🎉';
+
+  if(activeCount===0){cardList.innerHTML='';}
+  else{
+    cardList.innerHTML=Array.from({length:activeCount},(_,i)=>{
+      const num=done+i+1;
+      return`<div class="item-wrap" id="pw-${i}"><div class="hint-bg hint-done"><span class="hint-icon">💪</span></div><div class="item" id="pi-${i}"><div class="push-num">${num}</div><div class="push-body"><div class="push-label">push-up</div></div><div class="swipe-arrow">›</div></div></div>`;
+    }).join('');
+    attachSwipe();
+  }
+
+  const rounds=td.rounds||1;
+  document.getElementById('reset-btn').textContent=`🔄 Tur Ekle (${rounds}→${rounds+1}) +${state.goal} kart`;
+  renderHistoryLog();
 }
 
-function arcPath(startDeg, endDeg, r) {
-  const s = polarXY(startDeg, r);
-  const e = polarXY(endDeg,   r);
-  const large = (endDeg - startDeg) > 180 ? 1 : 0;
-  return `M ${s.x} ${s.y} A ${r} ${r} 0 ${large} 1 ${e.x} ${e.y}`;
+/* Swipe */
+function attachSwipe(){
+  const el=document.getElementById('pi-0');const wrap=document.getElementById('pw-0');
+  if(!el||!wrap)return;
+  const hintEl=wrap.querySelector('.hint-done');
+  let sx=0,sy=0,cx=0,on=false,locked=false;
+  function start(x,y){sx=x;sy=y;cx=0;on=true;locked=false;el.style.transition='none';}
+  function move(x,y){if(!on)return;const dx=x-sx,dy=y-sy;if(!locked){if(Math.abs(dy)>Math.abs(dx)&&Math.abs(dy)>8){on=false;return;}if(Math.abs(dx)>8)locked=true;else return;}if(dx<0){el.style.transform='translateX(0)';if(hintEl)hintEl.style.opacity=0;return;}cx=dx;el.style.transform=`translateX(${dx}px)`;if(hintEl)hintEl.style.opacity=Math.min(1,dx/90);}
+  function end(){if(!on&&!locked)return;on=false;if(cx>90)completePushup(el);else{el.style.transition='transform 0.25s cubic-bezier(0.4,0,0.2,1)';el.style.transform='translateX(0)';if(hintEl)hintEl.style.opacity=0;}}
+  el.addEventListener('touchstart',e=>{const t=e.touches[0];start(t.clientX,t.clientY);},{passive:true});
+  el.addEventListener('touchmove',e=>{if(!on)return;const t=e.touches[0];move(t.clientX,t.clientY);},{passive:true});
+  el.addEventListener('touchend',end);
+  el.addEventListener('mousedown',e=>{start(e.clientX,e.clientY);function mm(e2){move(e2.clientX,e2.clientY);}function mu(){end();window.removeEventListener('mousemove',mm);window.removeEventListener('mouseup',mu);}window.addEventListener('mousemove',mm);window.addEventListener('mouseup',mu);});
 }
 
-let arcLen = null;
+function completePushup(el){
+  const wrap=el.closest('.item-wrap');
+  playDone();launchFireworks(el);
+  el.style.transition='transform 0.32s cubic-bezier(0.4,0,0.2,1),opacity 0.32s';
+  el.style.transform='translateX(450px)';el.style.opacity='0';
+  if(wrap){wrap.style.transition='max-height 0.3s 0.28s,margin-bottom 0.3s 0.28s';wrap.style.maxHeight=wrap.offsetHeight+'px';wrap.style.overflow='hidden';setTimeout(()=>{wrap.style.maxHeight='0';wrap.style.marginBottom='0';},50);}
+  setTimeout(()=>{
+    const td=todayData();const target=todayTarget();
+    td.done=Math.min(td.done+1,target);saveState();showToast('💪 +1 push-up!');
+    if(td.done>=target)setTimeout(()=>celebrate(),300);
+    render();
+  },380);
+}
 
-function initArc() {
-  const path = arcPath(ARC.start, ARC.end, ARC.r);
-  document.getElementById('arc-track').setAttribute('d', path);
-  document.getElementById('arc-fill').setAttribute('d', path);
-  document.getElementById('arc-glow').setAttribute('d', path);
+function celebrate(){
+  const el=document.getElementById('celebration');const td=todayData();
+  document.getElementById('cel-msg').textContent='HEDEFE ULAŞTIN!';
+  document.getElementById('cel-sub').textContent=`// ${td.done} push-up tamamlandı! Bravo!`;
+  el.style.display='block';playGoal();setTimeout(()=>el.style.display='none',5000);
+}
 
-  // measure length via temporary render
-  const fill = document.getElementById('arc-fill');
-  arcLen = fill.getTotalLength();
+/* Reset — add a round */
+document.getElementById('reset-btn').addEventListener('click',()=>{
+  const td=todayData();const cur=td.rounds||1;
+  if(!confirm(`Tur ${cur}→${cur+1}: ${state.goal} yeni kart eklenecek. Tamamlananlar korunur.`))return;
+  td.rounds=cur+1;saveState();document.getElementById('celebration').style.display='none';
+  render();showToast(`🔄 Tur ${cur+1} başladı! +${state.goal} kart eklendi`);
+});
 
-  [fill, document.getElementById('arc-glow')].forEach(el => {
-    el.style.strokeDasharray  = arcLen;
-    el.style.strokeDashoffset = arcLen;
+/* Goal */
+document.getElementById('goal-minus').addEventListener('click',()=>{if(state.goal<=1)return;state.goal=Math.max(1,state.goal-1);saveState();render();});
+document.getElementById('goal-plus').addEventListener('click',()=>{state.goal=Math.min(200,state.goal+1);saveState();render();});
+
+/* History */
+document.getElementById('hist-date').value=todayStr();
+document.getElementById('hist-save').addEventListener('click',()=>{
+  const dateVal=document.getElementById('hist-date').value;
+  const countVal=parseInt(document.getElementById('hist-count').value);
+  if(!dateVal){showToast('❌ Tarih seç');return;}
+  if(!countVal||countVal<1){showToast('❌ Geçerli sayı gir');return;}
+  const d=dayData(dateVal);d.done=(d.done||0)+countVal;
+  if(!d.rounds)d.rounds=1;
+  saveState();document.getElementById('hist-count').value='';
+  showToast(`📅 ${dateVal}: ${countVal} push-up eklendi`);
+  if(dateVal===todayStr())render();else renderHistoryLog();
+});
+
+function formatDateLabel(k){const d=new Date(k+'T12:00:00');return d.toLocaleDateString('tr-TR',{weekday:'short',day:'numeric',month:'short',year:'numeric'});}
+
+function renderHistoryLog(){
+  const logEl=document.getElementById('history-log');
+  const today=todayStr();
+  const entries=Object.entries(state.days).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,30);
+  if(!entries.length){logEl.innerHTML='<div class="empty-done" style="padding:8px 0">// kayıt yok</div>';return;}
+  logEl.innerHTML=entries.map(([k,v])=>{
+    const isToday=k===today;
+    const target=state.goal*(v.rounds||1);
+    const pct=target>0?Math.round(v.done/target*100):0;
+    const label=isToday?'Bugün':formatDateLabel(k);
+    return`<div class="hlog-entry">
+      <span class="hlog-date">${label}</span>
+      <span class="hlog-goal">${v.done}/${target} (${pct}%)</span>
+      <span class="hlog-count">${v.done}</span>
+      <button class="hlog-del" data-date="${k}" title="Sil">✕</button>
+    </div>`;
+  }).join('');
+  logEl.querySelectorAll('.hlog-del').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const k=btn.dataset.date;
+      if(!confirm(`${formatDateLabel(k)} kaydı silinsin mi?`))return;
+      delete state.days[k];saveState();
+      if(k===todayStr())render();else renderHistoryLog();
+      showToast('🗑️ Kayıt silindi');
+    });
   });
 }
 
-function updateArc(fraction) {
-  if (!arcLen) initArc();
-  const clamped = Math.min(1, Math.max(0, fraction));
-  const offset  = arcLen * (1 - clamped);
+/* Clock */
+function updateClock(){const now=new Date();const d=document.getElementById('clock-date');const t=document.getElementById('clock-time');if(!d||!t)return;d.textContent=now.toLocaleDateString('tr-TR',{weekday:'short',day:'numeric',month:'long'});t.textContent=now.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
 
-  const fill = document.getElementById('arc-fill');
-  const glow = document.getElementById('arc-glow');
-  const tip  = document.getElementById('arc-tip');
-  const num  = document.getElementById('arc-num');
-
-  fill.style.strokeDashoffset = offset;
-  glow.style.strokeDashoffset = offset;
-
-  if (clamped > 0.005) {
-    const deg = ARC.start + (ARC.end - ARC.start) * clamped;
-    const pos = polarXY(deg, ARC.r);
-    tip.setAttribute('cx', pos.x);
-    tip.setAttribute('cy', pos.y);
-    tip.setAttribute('opacity', '1');
-  } else {
-    tip.setAttribute('opacity', '0');
-  }
-
-  if (clamped >= 1) {
-    fill.classList.add('complete');
-    num.classList.add('complete');
-  } else {
-    fill.classList.remove('complete');
-    num.classList.remove('complete');
-  }
-}
-
-// ── Setup ────────────────────────────────────────────────────────────────────
-function setupTracker() {
-  const goal  = parseInt(document.getElementById('setup-goal').value);
-  const total = parseInt(document.getElementById('setup-total').value);
-  if (!goal  || goal  < 1) { alert('Periyot hedefini gir.');  return; }
-  if (!total || total < 1) { alert('Toplam hedefi gir.'); return; }
-  state = { goal, totalGoal:total, log:[] };
-  save();
-  showTracker();
-  initArc();
-  render();
-}
-
-function editGoals() {
-  const g = prompt('Yeni periyot hedefi (tekrar):', state.goal);
-  const t = prompt('Yeni toplam hedef:', state.totalGoal);
-  if (g && parseInt(g) > 0) state.goal      = parseInt(g);
-  if (t && parseInt(t) > 0) state.totalGoal = parseInt(t);
-  save(); render();
-}
-
-function showTracker() {
-  document.getElementById('setup-section').style.display   = 'none';
-  document.getElementById('tracker-section').style.display = 'block';
-}
-
-// ── Log ──────────────────────────────────────────────────────────────────────
-function logReps() {
-  const input = parseInt(document.getElementById('rep-input').value);
-  const warn  = document.getElementById('warn-msg');
-  warn.style.display = 'none';
-  if (!input || input < 1) { warn.textContent = 'Geçerli bir sayı gir.'; warn.style.display='block'; return; }
-
-  const now    = getNow();
-  const key    = getPeriodKey(now);
-  const date   = getDateStr(now);
-  const period = getPeriod(now);
-
-  const existing  = entryFor(key);
-  const prevReps  = existing ? existing.reps : 0;
-  const newReps   = prevReps + input;
-  const hitGoal   = newReps >= state.goal;
-  const wasHit    = existing ? existing.hitGoal : false;
-  const cumBefore = state.log.reduce((s,e) => s + e.reps, 0) - prevReps;
-  const cumAfter  = cumBefore + newReps;
-
-  if (existing) { existing.reps = newReps; existing.hitGoal = hitGoal; }
-  else state.log.push({ key, date, period, reps:newReps, hitGoal });
-
-  document.getElementById('rep-input').value = '';
-  save();
-
-  if (hitGoal && !wasHit) celebrate('period');
-  const crossedTotal = cumBefore < state.totalGoal && cumAfter >= state.totalGoal;
-  if (crossedTotal) setTimeout(() => celebrate('total'), hitGoal && !wasHit ? 6500 : 0);
-
-  render();
-}
-
-function celebrate(type) {
-  const el = document.getElementById('celebration');
-  if (type === 'total') {
-    document.getElementById('cel-icon').textContent = '🏆';
-    document.getElementById('cel-msg').textContent  = 'TOPLAM HEDEFE ULAŞTIN!';
-    document.getElementById('cel-sub').textContent  = `// ${state.totalGoal.toLocaleString('tr-TR')} push-up tamamlandı!`;
-  } else {
-    document.getElementById('cel-icon').textContent = '💪';
-    document.getElementById('cel-msg').textContent  = 'HEDEFE ULAŞTIN!';
-    const p = getPeriod(getNow());
-    document.getElementById('cel-sub').textContent  =
-      p === 'morning' ? '// Sabah periyodu tamam. Öğleden sonra devam.' : '// Öğleden sonra periyodu tamam. Bravo!';
-  }
-  el.style.display = 'block';
-  setTimeout(() => el.style.display = 'none', 6000);
-}
-
-// ── Streak ───────────────────────────────────────────────────────────────────
-function calcStreak() {
-  const now = getNow();
-  const cur = getPeriodKey(now);
-  const seen = new Set();
-  const periods = [];
-  let t = new Date(now);
-  for (let i = 0; i < 60; i++) {
-    t = new Date(t.getTime() - 12 * 3600 * 1000);
-    const k = getPeriodKey(t);
-    if (k === cur || seen.has(k)) continue;
-    seen.add(k); periods.push(k);
-  }
-  let streak = 0;
-  for (const k of periods) {
-    const e = entryFor(k);
-    if (e && e.hitGoal) streak++; else break;
-  }
-  return streak;
-}
-
-// ── Render ───────────────────────────────────────────────────────────────────
-function render() {
-  const now     = getNow();
-  const period  = getPeriod(now);
-  const key     = getPeriodKey(now);
-  const dateStr = getDateStr(now);
-
-  document.getElementById('hdr-goal').textContent = state.goal;
-
-  const pill     = document.getElementById('period-pill');
-  pill.className = 'period-pill ' + (period === 'morning' ? 'morning' : 'afternoon');
-  document.getElementById('period-name').textContent =
-    period === 'morning' ? '🌅 Sabah periyodu (00:00–11:59)' : '🌆 Öğleden sonra (12:00–23:59)';
-
-  // Arc
-  const cumulative = state.log.reduce((s,e) => s + e.reps, 0);
-  const fraction   = state.totalGoal > 0 ? cumulative / state.totalGoal : 0;
-  document.getElementById('arc-num').textContent        = cumulative.toLocaleString('tr-TR');
-  document.getElementById('arc-pct').textContent        = Math.min(100, Math.round(fraction * 100)) + '%';
-  document.getElementById('arc-total-disp').textContent = state.totalGoal.toLocaleString('tr-TR');
-  updateArc(fraction);
-
-  // Arc bottom
-  const todayEntries = state.log.filter(e => e.date === dateStr);
-  const todayTotal   = todayEntries.reduce((s,e) => s + e.reps, 0);
-  const streak       = calcStreak();
-  const kalan        = Math.max(0, state.totalGoal - cumulative);
-  document.getElementById('ab-today').textContent  = todayTotal;
-  document.getElementById('ab-streak').textContent = streak;
-  document.getElementById('ab-kalan').textContent  = kalan > 0 ? kalan.toLocaleString('tr-TR') : '✓';
-
-  // Period counter
-  const curReps = periodReps(key);
-  const pct     = Math.min(100, Math.round(curReps / state.goal * 100));
-  const countEl = document.getElementById('period-count');
-  countEl.textContent = curReps;
-  countEl.className   = 'counter-big' + (curReps >= state.goal ? ' hit' : '');
-  document.getElementById('period-goal-disp').textContent = state.goal;
-  document.getElementById('period-bar').style.width       = pct + '%';
-  document.getElementById('prog-label').textContent       = curReps + ' / ' + state.goal;
-  document.getElementById('prog-pct').textContent         = pct + '%';
-
-  // Metrics
-  document.getElementById('m-today').textContent = todayTotal;
-  const periodsHit      = todayEntries.filter(e => e.hitGoal).length;
-  const periodsPossible = period === 'morning' ? 1 : 2;
-  const mPEl = document.getElementById('m-periods-hit');
-  mPEl.textContent = periodsHit + '/' + periodsPossible;
-  mPEl.className   = 'val' + (periodsHit === periodsPossible ? ' accent' : '');
-  document.getElementById('m-streak').textContent = streak;
-
-  renderLog(dateStr);
-}
-
-function renderLog(todayStr) {
-  const logEl  = document.getElementById('day-log');
-  const sorted = [...state.log].sort((a,b) => b.key.localeCompare(a.key));
-  if (!sorted.length) { logEl.innerHTML = '<div class="empty-log">// Henüz kayıt yok.</div>'; return; }
-  logEl.innerHTML = sorted.map(e => {
-    const dateDisplay = e.date === todayStr ? 'Bugün' : e.date.slice(5).replace('-','/');
-    const badge = e.hitGoal
-      ? '<span class="badge badge-ok">✓ Hedef</span>'
-      : e.reps > 0
-      ? '<span class="badge badge-partial">Kısmi</span>'
-      : '<span class="badge badge-miss">Eksik</span>';
-    return `<div class="log-entry">
-      <span class="log-period">${dateDisplay} · ${periodShort(e.period)}</span>
-      <span class="log-reps">${e.reps} tekrar</span>${badge}</div>`;
-  }).join('');
-}
-
-// ── Clock ────────────────────────────────────────────────────────────────────
-function updateClock() {
-  const now    = new Date();
-  const dateEl = document.getElementById('clock-date');
-  const timeEl = document.getElementById('clock-time');
-  if (!dateEl || !timeEl) return;
-  dateEl.textContent = now.toLocaleDateString('tr-TR', { weekday:'short', day:'numeric', month:'long' });
-  timeEl.textContent = now.toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
-}
-
-let lastPeriodKey = null;
-function checkPeriodChange() {
-  const k = getPeriodKey(getNow());
-  if (lastPeriodKey && lastPeriodKey !== k) render();
-  lastPeriodKey = k;
-}
-
-function resetAll() {
-  if (!confirm('Tüm veriler silinsin mi?')) return;
-  localStorage.removeItem(KEY);
-  state = { goal:0, totalGoal:0, log:[] };
-  document.getElementById('setup-section').style.display   = 'block';
-  document.getElementById('tracker-section').style.display = 'none';
-}
-
-// ── Init ─────────────────────────────────────────────────────────────────────
-load();
-if (state.goal > 0) { showTracker(); }
-lastPeriodKey = getPeriodKey(getNow());
-setInterval(updateClock, 1000);
-setInterval(checkPeriodChange, 10000);
+loadState();
+window.addEventListener('load',()=>{initArc();render();});
+setInterval(updateClock,1000);
 updateClock();
-
-// Init arc after DOM is ready (needs layout for getTotalLength)
-window.addEventListener('load', () => {
-  if (state.goal > 0) { initArc(); render(); }
-});
-document.addEventListener('visibilitychange', () => { if (!document.hidden) { render(); updateClock(); } });
-window.addEventListener('focus', () => { render(); updateClock(); });
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)render();});
 </script>
 </body>
 </html>
