@@ -50,12 +50,13 @@ html,body{height:100%;background:var(--bg);font-family:var(--body);color:var(--t
 
 .arc-wrapper{display:flex;flex-direction:column;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px 20px 18px;position:relative;overflow:hidden}
 .arc-wrapper::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),transparent)}
-.arc-svg{width:180px;height:180px;overflow:visible}
+.arc-svg-wrap{position:relative;width:180px;height:180px;}
+.arc-svg{width:180px;height:180px;overflow:visible;display:block;}
 .arc-track{fill:none;stroke:var(--border);stroke-width:12;stroke-linecap:round}
 .arc-fill{fill:none;stroke:var(--accent);stroke-width:12;stroke-linecap:round;transition:stroke-dashoffset 0.8s cubic-bezier(0.34,1.2,0.64,1)}
 .arc-fill.complete{filter:drop-shadow(0 0 8px #d4ff4e99)}
-.arc-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-62%);text-align:center;pointer-events:none}
-.arc-pct{font-family:var(--display);font-size:58px;line-height:1;color:var(--text);transition:color 0.3s}
+.arc-center{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+.arc-pct{font-family:var(--display);font-size:58px;line-height:1;color:var(--text);transition:color 0.3s;display:block;}
 .arc-pct.complete{color:var(--accent)}
 .arc-lbl-bot{font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:4px}
 .arc-bottom{display:flex;justify-content:space-between;width:100%;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
@@ -148,21 +149,21 @@ html,body{height:100%;background:var(--bg);font-family:var(--body);color:var(--t
 
   <div style="padding:14px 20px 0">
     <div class="arc-wrapper">
-      <svg class="arc-svg" viewBox="0 0 180 180">
-        <defs>
-          <filter id="glow-f">
-            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-            <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-        </defs>
-        <path id="arc-track" class="arc-track"/>
-        <path id="arc-glow" class="arc-fill" style="stroke:var(--accent);stroke-width:20;opacity:0.1;transition:stroke-dashoffset 0.8s cubic-bezier(0.34,1.2,0.64,1)"/>
-        <path id="arc-fill" class="arc-fill"/>
-        <circle id="arc-tip" r="6" fill="var(--accent)" opacity="0" style="filter:url(#glow-f);transition:opacity 0.4s"/>
-      </svg>
-      <div class="arc-center">
-        <div class="arc-pct" id="arc-pct">0%</div>
-        <div class="arc-lbl-bot" id="arc-lbl-bot">0 / 0</div>
+      <div class="arc-svg-wrap">
+        <svg class="arc-svg" viewBox="0 0 180 180">
+          <defs>
+            <filter id="glow-f">
+              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+              <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <circle id="arc-track" class="arc-track"/>
+          <circle id="arc-glow" class="arc-fill" style="stroke:var(--accent);stroke-width:20;opacity:0.1;transition:stroke-dashoffset 0.8s cubic-bezier(0.34,1.2,0.64,1)"/>
+          <circle id="arc-fill" class="arc-fill"/>
+        </svg>
+        <div class="arc-center">
+          <div class="arc-pct" id="arc-pct">0%</div>
+        </div>
       </div>
       <div class="arc-bottom">
         <div class="arc-stat">
@@ -189,6 +190,15 @@ html,body{height:100%;background:var(--bg);font-family:var(--body);color:var(--t
       <button class="goal-btn" id="goal-minus">−</button>
       <div class="goal-num" id="goal-disp">10</div>
       <button class="goal-btn" id="goal-plus">+</button>
+    </div>
+  </div>
+
+  <div class="goal-row">
+    <div class="goal-label">Toplam hedef</div>
+    <div class="goal-controls">
+      <button class="goal-btn" id="tgoal-minus">−</button>
+      <div class="goal-num" id="tgoal-disp" style="width:72px;font-size:22px">1000</div>
+      <button class="goal-btn" id="tgoal-plus">+</button>
     </div>
   </div>
 
@@ -224,13 +234,14 @@ html,body{height:100%;background:var(--bg);font-family:var(--body);color:var(--t
 
 <script>
 const KEY = 'pushup_swipe_v2';
-let state = { goal: 10, days: {} };
+let state = { goal: 10, totalGoal: 1000, days: {} };
 
 function todayStr() { return new Date().toISOString().split('T')[0]; }
 function dayData(k) { if (!state.days[k]) state.days[k] = { done:0, rounds:1 }; return state.days[k]; }
 function todayData() { return dayData(todayStr()); }
 function saveState() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} }
-function loadState() { try { const s=localStorage.getItem(KEY); if(s) state=Object.assign({goal:10,days:{}},JSON.parse(s)); } catch(e){} }
+function loadState() { try { const s=localStorage.getItem(KEY); if(s) state=Object.assign({goal:10,totalGoal:1000,days:{}},JSON.parse(s)); } catch(e){} }
+function allTimeDone() { return Object.values(state.days).reduce((s,d)=>s+(d.done||0),0); }
 
 /* Audio */
 let audioCtx=null;
@@ -253,12 +264,34 @@ function applyTheme(){document.documentElement.setAttribute('data-theme',dark?'d
 applyTheme();
 document.getElementById('theme-btn').addEventListener('click',()=>{dark=!dark;applyTheme();});
 
-/* Arc */
-const ARC={cx:90,cy:90,r:72,start:135,end:405};let arcLen=null;
-function polarXY(deg,r){const rad=(deg-90)*Math.PI/180;return{x:ARC.cx+r*Math.cos(rad),y:ARC.cy+r*Math.sin(rad)};}
-function arcPathD(s,e,r){const sp=polarXY(s,r),ep=polarXY(e,r);return`M ${sp.x} ${sp.y} A ${r} ${r} 0 ${(e-s)>180?1:0} 1 ${ep.x} ${ep.y}`;}
-function initArc(){const path=arcPathD(ARC.start,ARC.end,ARC.r);['arc-track','arc-fill','arc-glow'].forEach(id=>document.getElementById(id).setAttribute('d',path));const fill=document.getElementById('arc-fill');arcLen=fill.getTotalLength();[fill,document.getElementById('arc-glow')].forEach(el=>{el.style.strokeDasharray=arcLen;el.style.strokeDashoffset=arcLen;});}
-function updateArc(fraction){if(!arcLen)initArc();const c=Math.min(1,Math.max(0,fraction));const offset=arcLen*(1-c);const fill=document.getElementById('arc-fill');const glow=document.getElementById('arc-glow');const tip=document.getElementById('arc-tip');const pctEl=document.getElementById('arc-pct');fill.style.strokeDashoffset=offset;glow.style.strokeDashoffset=offset;if(c>0.005){const deg=ARC.start+(ARC.end-ARC.start)*c;const pos=polarXY(deg,ARC.r);tip.setAttribute('cx',pos.x);tip.setAttribute('cy',pos.y);tip.setAttribute('opacity','1');}else{tip.setAttribute('opacity','0');}if(c>=1){fill.classList.add('complete');pctEl.classList.add('complete');}else{fill.classList.remove('complete');pctEl.classList.remove('complete');}}
+/* Arc - full circle */
+const ARC={cx:90,cy:90,r:72};
+const arcCircum=2*Math.PI*ARC.r;
+function initArc(){
+  ['arc-track','arc-fill','arc-glow'].forEach(id=>{
+    const el=document.getElementById(id);
+    el.setAttribute('cx',ARC.cx);el.setAttribute('cy',ARC.cy);el.setAttribute('r',ARC.r);
+  });
+  [document.getElementById('arc-fill'),document.getElementById('arc-glow')].forEach(el=>{
+    el.style.strokeDasharray=arcCircum;el.style.strokeDashoffset=arcCircum;
+  });
+  // rotate so fill starts from top
+  ['arc-fill','arc-glow'].forEach(id=>{
+    document.getElementById(id).style.transform='rotate(-90deg)';
+    document.getElementById(id).style.transformOrigin=ARC.cx+'px '+ARC.cy+'px';
+  });
+}
+function updateArc(fraction){
+  const c=Math.min(1,Math.max(0,fraction));
+  const offset=arcCircum*(1-c);
+  const fill=document.getElementById('arc-fill');
+  const glow=document.getElementById('arc-glow');
+  const pctEl=document.getElementById('arc-pct');
+  fill.style.strokeDashoffset=offset;
+  glow.style.strokeDashoffset=offset;
+  if(c>=1){fill.classList.add('complete');pctEl.classList.add('complete');}
+  else{fill.classList.remove('complete');pctEl.classList.remove('complete');}
+}
 
 function calcStreak(){let streak=0;const d=new Date();d.setDate(d.getDate()-1);for(let i=0;i<90;i++){const k=d.toISOString().split('T')[0];const day=state.days[k];if(day&&day.done>=state.goal)streak++;else break;d.setDate(d.getDate()-1);}return streak;}
 function getPeriod(){return new Date().getHours()<12?'morning':'afternoon';}
@@ -270,13 +303,17 @@ function render(){
   const remaining=Math.max(0,target-done);const fraction=target>0?done/target:0;
   const pct=Math.round(fraction*100);
 
-  document.getElementById('header-sub').textContent=done>=target?'// hedef tamamlandı 🎉':`// ${remaining} push-up kaldı`;
+  const total = allTimeDone();
+  const totalFraction = state.totalGoal > 0 ? total / state.totalGoal : 0;
+  const totalPct = Math.min(100, Math.round(totalFraction * 100));
+
+  document.getElementById('header-sub').textContent=done>=target?'// bugün tamamlandı 🎉':`// bugün ${remaining} kaldı`;
   document.getElementById('goal-disp').textContent=state.goal;
-  document.getElementById('arc-pct').textContent=pct+'%';
-  document.getElementById('arc-lbl-bot').textContent=done+' / '+target;
-  updateArc(fraction);
-  document.getElementById('ab-done').textContent=done;
-  document.getElementById('ab-remaining').textContent=remaining>0?remaining:'✓';
+  document.getElementById('tgoal-disp').textContent=state.totalGoal.toLocaleString('tr-TR');
+  document.getElementById('arc-pct').textContent=totalPct+'%';
+  updateArc(totalFraction);
+  document.getElementById('ab-done').textContent=total.toLocaleString('tr-TR');
+  document.getElementById('ab-remaining').textContent=(Math.max(0,state.totalGoal-total)).toLocaleString('tr-TR');
   document.getElementById('ab-streak').textContent=calcStreak();
 
   const period=getPeriod();const pill=document.getElementById('period-pill');
@@ -339,7 +376,6 @@ function celebrate(){
 /* Reset — add a round */
 document.getElementById('reset-btn').addEventListener('click',()=>{
   const td=todayData();const cur=td.rounds||1;
-  if(!confirm(`Tur ${cur}→${cur+1}: ${state.goal} yeni kart eklenecek. Tamamlananlar korunur.`))return;
   td.rounds=cur+1;saveState();document.getElementById('celebration').style.display='none';
   render();showToast(`🔄 Tur ${cur+1} başladı! +${state.goal} kart eklendi`);
 });
@@ -347,6 +383,10 @@ document.getElementById('reset-btn').addEventListener('click',()=>{
 /* Goal */
 document.getElementById('goal-minus').addEventListener('click',()=>{if(state.goal<=1)return;state.goal=Math.max(1,state.goal-1);saveState();render();});
 document.getElementById('goal-plus').addEventListener('click',()=>{state.goal=Math.min(200,state.goal+1);saveState();render();});
+
+/* Total Goal */
+document.getElementById('tgoal-minus').addEventListener('click',()=>{if(state.totalGoal<=10)return;state.totalGoal=Math.max(10,state.totalGoal-10);saveState();render();});
+document.getElementById('tgoal-plus').addEventListener('click',()=>{state.totalGoal=Math.min(100000,state.totalGoal+10);saveState();render();});
 
 /* History */
 document.getElementById('hist-date').value=todayStr();
@@ -359,7 +399,7 @@ document.getElementById('hist-save').addEventListener('click',()=>{
   if(!d.rounds)d.rounds=1;
   saveState();document.getElementById('hist-count').value='';
   showToast(`📅 ${dateVal}: ${countVal} push-up eklendi`);
-  if(dateVal===todayStr())render();else renderHistoryLog();
+  render();
 });
 
 function formatDateLabel(k){const d=new Date(k+'T12:00:00');return d.toLocaleDateString('tr-TR',{weekday:'short',day:'numeric',month:'short',year:'numeric'});}
@@ -384,7 +424,6 @@ function renderHistoryLog(){
   logEl.querySelectorAll('.hlog-del').forEach(btn=>{
     btn.addEventListener('click',()=>{
       const k=btn.dataset.date;
-      if(!confirm(`${formatDateLabel(k)} kaydı silinsin mi?`))return;
       delete state.days[k];saveState();
       if(k===todayStr())render();else renderHistoryLog();
       showToast('🗑️ Kayıt silindi');
